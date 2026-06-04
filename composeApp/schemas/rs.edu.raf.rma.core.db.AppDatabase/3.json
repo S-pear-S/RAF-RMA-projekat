@@ -1,0 +1,408 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "758898b1eedb6d0919901069b3a3092a",
+    "entities": [
+      {
+        "tableName": "movies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `title` TEXT NOT NULL, `year` INTEGER NOT NULL, `imdbRating` REAL, `imdbVotes` INTEGER, `posterPath` TEXT, PRIMARY KEY(`imdbId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imdbRating",
+            "columnName": "imdbRating",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "imdbVotes",
+            "columnName": "imdbVotes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId"
+          ]
+        }
+      },
+      {
+        "tableName": "movie_details",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `tmdbId` INTEGER, `title` TEXT NOT NULL, `originalTitle` TEXT, `overview` TEXT, `tagline` TEXT, `releaseDate` TEXT, `year` INTEGER NOT NULL, `runtime` INTEGER, `languageCode` TEXT, `imdbRating` REAL, `imdbVotes` INTEGER, `tmdbRating` REAL, `tmdbVotes` INTEGER, `posterPath` TEXT, `backdropPath` TEXT, PRIMARY KEY(`imdbId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tmdbId",
+            "columnName": "tmdbId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalTitle",
+            "columnName": "originalTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "overview",
+            "columnName": "overview",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tagline",
+            "columnName": "tagline",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "releaseDate",
+            "columnName": "releaseDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "runtime",
+            "columnName": "runtime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "languageCode",
+            "columnName": "languageCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imdbRating",
+            "columnName": "imdbRating",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "imdbVotes",
+            "columnName": "imdbVotes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "tmdbRating",
+            "columnName": "tmdbRating",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "tmdbVotes",
+            "columnName": "tmdbVotes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "backdropPath",
+            "columnName": "backdropPath",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId"
+          ]
+        }
+      },
+      {
+        "tableName": "genres",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "movie_genre_cross_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `genreId` INTEGER NOT NULL, PRIMARY KEY(`imdbId`, `genreId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "genreId",
+            "columnName": "genreId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId",
+            "genreId"
+          ]
+        }
+      },
+      {
+        "tableName": "actors",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `name` TEXT NOT NULL, `profilePath` TEXT, `department` TEXT, PRIMARY KEY(`imdbId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profilePath",
+            "columnName": "profilePath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "department",
+            "columnName": "department",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId"
+          ]
+        }
+      },
+      {
+        "tableName": "movie_actor_cross_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`movieImdbId` TEXT NOT NULL, `actorImdbId` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`movieImdbId`, `actorImdbId`, `order`))",
+        "fields": [
+          {
+            "fieldPath": "movieImdbId",
+            "columnName": "movieImdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actorImdbId",
+            "columnName": "actorImdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "movieImdbId",
+            "actorImdbId",
+            "order"
+          ]
+        }
+      },
+      {
+        "tableName": "favorites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `title` TEXT NOT NULL, `year` INTEGER NOT NULL, `imdbRating` REAL, `posterPath` TEXT, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`imdbId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imdbRating",
+            "columnName": "imdbRating",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId"
+          ]
+        }
+      },
+      {
+        "tableName": "watchlist",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`imdbId` TEXT NOT NULL, `title` TEXT NOT NULL, `year` INTEGER NOT NULL, `imdbRating` REAL, `posterPath` TEXT, `addedAt` INTEGER NOT NULL, PRIMARY KEY(`imdbId`))",
+        "fields": [
+          {
+            "fieldPath": "imdbId",
+            "columnName": "imdbId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "year",
+            "columnName": "year",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imdbRating",
+            "columnName": "imdbRating",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "posterPath",
+            "columnName": "posterPath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "imdbId"
+          ]
+        }
+      },
+      {
+        "tableName": "quiz_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `score` REAL NOT NULL, `correctAnswers` INTEGER NOT NULL, `totalQuestions` INTEGER NOT NULL, `timeUsedSeconds` INTEGER NOT NULL, `playedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "score",
+            "columnName": "score",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "correctAnswers",
+            "columnName": "correctAnswers",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalQuestions",
+            "columnName": "totalQuestions",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timeUsedSeconds",
+            "columnName": "timeUsedSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "playedAt",
+            "columnName": "playedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '758898b1eedb6d0919901069b3a3092a')"
+    ]
+  }
+}

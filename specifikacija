@@ -1,0 +1,162 @@
+RMA Projekat 2 | Compose Multiplatform
+Poslednje ažuriranje: 14.05.2026
+Showtime je multiplatformska aplikacija o filmovima sa katalogom, kvizom, omiljenim filmovima i listom za gledanje. Svi podaci o filmovima, uključujući favorites i watchlist sinhronizuju se sa serverom, dok lokalni UI čita podatke iz Room baze kao Single Source of Truth kroz MVI arhitekturu i jednosmernim tokom podataka.
+1. Bodovanje
+Vizuelni dizajn se ne ocenjuje. Autori imaju slobodu u izgledu aplikacije, dok se ocenjuju funkcionalnost, arhitektura i korektnost tokova podataka.
+Funkcionalni zahtevi
+Sekcija
+	Poeni
+	Remote nalog i autentikacija
+	5
+	Katalog filmova
+	3
+	Favorites + Watchlist
+	5
+	Kviz
+	14
+	Profile
+	3
+	Ukupno
+	30
+
+
+Kazneni poeni za tehničke zahteve
+Sekcija
+	Maksimalna kazna
+	MVI disciplina
+	-10
+	Room kao SSOT + Repository pattern
+	-10
+	Multi-target Compose Multiplatform
+	-5
+	Korektnost auth flow-a
+	-3
+	Kviz randomizacija i bodovanje
+	-2
+	2. Funkcionalni zahtevi
+2.1 Auth Landing
+Pri prvom pokretanju korisnik dolazi na auth landing ekran. U glavni deo aplikacije ulazi tek nakon registracije ili prijave; pri narednim pokretanjima ostaje prijavljen dok je token validan.
+* Registracija: full name, username i password; sva polja su obavezna.
+* Username sadrži samo slova, cifre i donju crtu (a-z, A-Z, 0-9, _), ima najmanje 3 karaktera i mora biti jedinstven.
+* Password ima najmanje 8 karaktera. Login koristi username i password.
+* Token se čuva u DataStore-u i šalje uz sve autentikovane zahteve.
+* Logout na Profile ekranu briše token i lokalne korisničke podatke (favorites, watchlist) i čuva globalne podatke o filmovima, a zatim vraća korisnika na auth landing.
+* Svaki 401 odgovor na autentikovani zahtev pokreće prinudnu odjavu.
+* Login i signup forme imaju loading i error stanja: mrežna greška, nevalidni kredencijali i zauzet username.
+2.2 Katalog filmova
+Katalog zadržava oblik iz Premiere projekta, ali UI ne čita direktno sa API-ja. Repository sinhronizuje podatke sa serverom i upisuje ih u Room, a ekrani posmatraju Room flows.
+* Movies List: paginacija, pretraga, žanrovski filter, godišnji opseg, minimalni rejting i sortiranje; query parametri su isti kao za GET /movies u Premiere-u (izuzev za popularnost, nju možete da zanemarite kao kriterijum za sortiranje u sklopu Showtime projekta).
+* Filter Movies funkcionalnost koristi iste kontrole kao u Premiere-u. Poželjno je da bude u okviru Movies list ekrana. Može i kao zasebni ekran, ali biste morali stanje da čuvate globalno.
+* Movie Detail prikazuje poster, backdrop, naslov, godinu, trajanje, žanrove, rejtinge, overview i glumce.
+* Movie Detail dodatno sadrži dugmad za Favorite i Watchlist.
+2.3 Favorites i Watchlist
+Favorites i Watchlist su dve nezavisne liste sinhronizovane sa serverom. Imenovanje u kodu i UI-ju treba da bude Favorite i Watchlist.
+* Toggle na Movie Detail ekranu šalje POST za dodavanje ili DELETE za uklanjanje.
+* Room je SSOT: UI odmah menja stanje optimistički, a ako server vrati grešku, vraća prethodno stanje i prikazuje poruku.
+* Favorites i Watchlist ekrani prikazuju odgovarajuće liste; tap otvara detalje. Treba postojati opcija za uklanjanje filma direktno na ekranu.
+* Sinhronizacija se pokreće pri otvaranju ekrana.
+* Liste su dostupne offline u read-only režimu. Read-only ne mora da se forsira.
+2.4 Kviz
+Sesija ima 10 pitanja i limit od 60 sekundi. Po isteku vremena aplikacija automatski vodi na rezultat, a neodgovorena pitanja vrede 0 poena.
+* Prikazuje se jedno pitanje po ekranu; nema povratka na prethodna pitanja.
+* Tap na odgovor je konačan. Kratko se označava tačan odgovor, kao i pogrešan izbor ako ga je korisnik izabrao, zatim sledi tranzicija na naredno pitanje.
+* Poželjno je da tranzicija između pitanja bude animirana (npr. slide, fade ili shared element).
+* Back tokom kviza prikazuje dijalog za potvrdu u fazonu: "Abandon quiz? Your progress will be lost." Potvrđen izlazak ne boduje sesiju.
+* Quiz ekran ne prikazuje Up dugme.
+* Result ekran na kraju kviza prikazuje skor 0-100, broj tačnih i netačnih odgovora i iskorišćeno vreme.
+2.5 Profile
+* Profile ekran prikazuje podatke prijavljenog korisnika sa servera: full name i username.
+* Lokalno u Room-u vodi se najbolji skor kroz sve sesije i broj odigranih kvizova. Opciono možete i da pratite sve kviz sesije i da ih prikažete takođe na ekranu.
+* Ekran prikazuje broj omiljenih filmova i broj filmova na watchlisti.
+* Logout dugme je dostupno na ovom ekranu.
+3. Tehnički zahtevi
+Projekat treba da prati smernice sa nastave, uz posebno poštovanje Kotlin Multiplatform, Room kao Single Source of Truth, MVI i Unidirectional Data Flow principa.
+* Aplikacija je Compose Multiplatform i mora raditi na Android platformi + iOS ili JVM (desktop).
+* MVI sloj jasno razdvaja ViewState, Intent/Action, Reducer i Effect. UI šalje namere, posmatra stanje i ne menja podatke direktno. Kao što smo radili na nastavi.
+* Tok podataka je jednosmeran: UI -> Intent/Action -> ViewModel/Store -> Repository/UseCase -> State/Effect -> UI. Kao što smo radili na nastavi.
+* Room je single source of truth za katalog, favorites, watchlist i lokalnu statistiku kviza.
+* Repository sloj je odgovoran za sinhronizaciju API-ja i Room-a, mapiranje modela i obradu grešaka.
+* Loading, empty, offline i error stanja moraju biti eksplicitno modelovana u state-u za sve ekrane.
+* Autentikacija i životni ciklus tokena moraju biti centralizovani, bez dupliranja logike po ekranima.
+4. Mehanika kviza
+Kviz za sada ima jednu kategoriju: Movie Knowledge (category=1, hardkodovano), uz prostor za proširenje u budućim verzijama.
+Tip
+	Prikaz
+	Generisanje
+	Guess the Movie
+	Backdrop ili poster bez teksta naslova i bez overlay-a koji otkriva film; 4 naslova, 1 tačan.
+	Izabrati film M, slučajnu poster/backdrop sliku (ne logo) i 3 pogrešna filma koji nisu M.
+	Guess the Movie Year
+	Poster i naslov filma; 4 godine, 1 tačna.
+	Tačan odgovor je godina izdanja Y. Pogrešni odgovori su različiti offseti od Y (npr. +/-1 do +/-10), bez ponavljanja.
+	Guess the Lead Actor
+	Poster i naslov filma; 4 imena glumaca, 1 tačno.
+	Film mora imati glumce. Tačan odgovor je jedan od prva tri glumca; Pogrešni odgovori bilo koja 3 glumca ili glumice koji ne igraju u tom filmu.
+
+
+Pravila sesije
+* Sesija ima 10 pitanja; tipovi pitanja su randomizovani. Preporuka: nijedan tip ne više od 4 puta po sesiji.
+* Randomizacija mora sprečiti ponavljanje slika u okviru sesije i obezbediti različite lažne odgovore.
+* Ako izabrani film ne ispunjava uslove pitanja (npr. nema cast, poster ili dovoljno žanrova), generator bira drugi film i mora stabilno završiti rad i nakon više preskakanja.
+* Kviz može da počne samo ako lokalna baza ima najmanje 10 filmova sa bar jednom slikom. U suprotnom prikazati poruku poput: "Browse the catalog first to populate your quiz pool." Bootstrap od 100 top filmova bi trebalo da pokrije ovaj uslov.
+5. Formula bodovanja
+Legenda: BTO = broj tačnih odgovora; MVT = maksimalno vreme trajanja kviza (60s); PVT = preostalo vreme u sekundama; UBP = ukupan broj poena.
+Formula: UBP = BTO * (9 + PVT / MVT), ograničeno na najviše 100.00
+Svaki tačan odgovor vredi 9 osnovnih poena i do 1 poen vremenskog bonusa. Ograničenje na 100 je zaštitno; u normalnim uslovima maksimum je 100. Vidite primere u tabeli ispod.
+
+
+
+
+
+
+Tačnih
+	Iskorišćeno vreme
+	Preostalo vreme
+	Skor
+	10
+	0s
+	60s
+	100.00
+	10
+	30s
+	30s
+	95.00
+	10
+	59s
+	1s
+	90.17
+	10
+	60s (timeout)
+	0s
+	90.00
+	8
+	20s
+	40s
+	77.33
+	5
+	30s
+	30s
+	47.50
+	5
+	60s (timeout)
+	0s
+	45.00
+	0
+	bilo koje
+	bilo koje
+	0.00
+
+
+6. Backend
+Backend je RMA Movies API korišćen u Premiere projektu, proširen sa Showtime endpoint-ovima.
+Kompletna dokumentacija, uključujući autentikovane endpoint-ove i primere payload-a: https://rma.finlab.rs/movies/docs
+7. Napomene
+* Projekat je indivudalan. Međusobno deljenje projekta dovodi do poništavanja bodova.
+* Neophodno je koristiti javno dostupan Git repo za prijavu projekta i main granu.
+* Projekat se prijavljuje putem Google Forme koje ćemo naknadno poslati i u kojoj ćete upisati svoj javno dostupni Git repo.
+* Rok za izradu projekta je 04.06.2026. 12:00:00 (podne) za odbrane u četvrtoj kolokvijumskoj nedelji.
+* Svaki projekat biće detaljno analiziran od strane AI Agenata za korektnost implementacije i protiv potencijalnog deljenja projekta. U analizu ne ulaze primeri sa nastave. Primere sa nastave možete slobodno koristiti. Detaljan report možete dobiti na odbrani ukoliko budete tražili.
+* Projekat se brani u četvrtoj kolokvijumskoj nedelji. BIćete nakadno obavešteni o tačnom datumu.
+* Postoji mogućnost popravnog projekta u Junskom roku, s tim što nećete moći da polažete ispit tada. Konačni rok za izradu popravnog projekta biće naknadno objavljen.
+* Postoji mogućnost i ranije odbrane projekta u dogovoru sa nastavnicima i ukoliko postoji mogućnost za tako nešto.
+Showtime - Projekat

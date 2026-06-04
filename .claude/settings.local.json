@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew :kotlin:compileCommonMainKotlinMetadata:*)",
+      "Bash(./gradlew :androidApp:assembleDebug:*)",
+      "Bash(./gradlew :desktopApp:classes:*)",
+      "Bash(./gradlew :kotlin:compileKotlinJvm:*)",
+      "WebFetch(domain:rma.finlab.rs)",
+      "Bash(./gradlew :composeApp:compileKotlinJvm)",
+      "Bash(./gradlew :desktopApp:run)",
+      "Bash(curl -s https://rma.finlab.rs/beskar/stats)",
+      "Bash(python3 -m json.tool)",
+      "Bash(./gradlew :composeApp:compileKotlinJvm :desktopApp:compileKotlin)",
+      "Bash(./gradlew :composeApp:compileKotlinJvm :composeApp:compileKotlinAndroid)",
+      "Bash(./gradlew :desktopApp:compileKotlin :composeApp:compileKotlinJvm)",
+      "Bash(./gradlew :androidApp:compileDebugKotlin)",
+      "Read(//Users/ailic/Source/rma/2026/compose-multiplatform-template/**)",
+      "Bash(mkdir /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/app)",
+      "Bash(mv /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/androidApp /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/app/android)",
+      "Bash(mv /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/desktopApp /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/app/desktop)",
+      "Bash(mv /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/iosApp /Users/ailic/Source/rma/2026/rma-09-kotlin-vezbe/app/ios)",
+      "Bash(grep *)",
+      "Bash(sqlite3 *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "PowerShell(head *)",
+      "PowerShell(Get-Process *)",
+      "Bash(xargs head -n 80)"
+    ]
+  }
+}
