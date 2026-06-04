@@ -2,6 +2,8 @@ package rs.edu.raf.rma.movies.list
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import rs.edu.raf.rma.movies.domain.Genre
 import rs.edu.raf.rma.movies.domain.MovieFilter
 
 private val SORT_OPTIONS = listOf(
@@ -34,13 +39,15 @@ private val SORT_OPTIONS = listOf(
     "tmdb_rating" to "TMDB Rejting",
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FilterSheet(
     currentFilter: MovieFilter,
+    genres: List<Genre>,
     onApply: (MovieFilter) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var selectedGenreId by remember { mutableStateOf(currentFilter.genreId) }
     var minYear by remember { mutableStateOf(currentFilter.minYear?.toString() ?: "") }
     var maxYear by remember { mutableStateOf(currentFilter.maxYear?.toString() ?: "") }
     var minRating by remember { mutableStateOf(currentFilter.minRating?.toString() ?: "") }
@@ -55,7 +62,25 @@ fun FilterSheet(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Filteri", style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        Text("Filteri", style = MaterialTheme.typography.titleMedium)
+
+        if (genres.isNotEmpty()) {
+            Text("Žanr", style = MaterialTheme.typography.labelLarge)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                genres.forEach { genre ->
+                    FilterChip(
+                        selected = selectedGenreId == genre.id,
+                        onClick = {
+                            selectedGenreId = if (selectedGenreId == genre.id) null else genre.id
+                        },
+                        label = { Text(genre.name) },
+                    )
+                }
+            }
+        }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
@@ -116,13 +141,25 @@ fun FilterSheet(
         Spacer(Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                Text("Otkaži")
+            OutlinedButton(
+                onClick = {
+                    selectedGenreId = null
+                    minYear = ""
+                    maxYear = ""
+                    minRating = ""
+                    sortBy = "imdb_rating"
+                    sortOrder = "desc"
+                    onApply(MovieFilter())
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text("Obriši sve")
             }
             Button(
                 onClick = {
                     onApply(
                         currentFilter.copy(
+                            genreId = selectedGenreId,
                             minYear = minYear.toIntOrNull(),
                             maxYear = maxYear.toIntOrNull(),
                             minRating = minRating.toDoubleOrNull(),

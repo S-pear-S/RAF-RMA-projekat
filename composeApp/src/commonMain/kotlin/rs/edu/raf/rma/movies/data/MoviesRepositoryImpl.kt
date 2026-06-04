@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import rs.edu.raf.rma.movies.db.MovieActorCrossRef
 import rs.edu.raf.rma.movies.db.MovieDao
 import rs.edu.raf.rma.movies.db.QuizSessionEntity
+import rs.edu.raf.rma.movies.domain.Genre
 import rs.edu.raf.rma.movies.domain.Movie
 import rs.edu.raf.rma.movies.domain.MovieDetails
 import rs.edu.raf.rma.movies.domain.MovieFilter
@@ -92,6 +93,9 @@ class MoviesRepositoryImpl(
 
     override suspend fun countMoviesWithImages(): Int = dao.countMoviesWithImages()
 
+    override fun observeGenres(): Flow<List<Genre>> =
+        dao.observeGenres().map { list -> list.map { Genre(it.id, it.name) } }
+
     override fun observeFavorites(): Flow<List<Movie>> =
         dao.observeFavorites().map { list -> list.map { it.toDomain() } }
 
@@ -153,6 +157,7 @@ class MoviesRepositoryImpl(
     override suspend fun clearUserData() {
         dao.clearFavorites()
         dao.clearWatchlist()
+        dao.clearQuizSessions()
     }
 
     override fun observeBestQuizScore(): Flow<Double?> = dao.observeBestScore()

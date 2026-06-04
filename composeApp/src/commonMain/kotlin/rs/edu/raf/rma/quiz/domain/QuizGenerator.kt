@@ -23,6 +23,8 @@ class QuizGenerator(
             error("Browse the catalog first to populate your quiz pool.")
         }
 
+        val backdropMap = dao.getMovieBackdropPaths().associate { it.imdbId to it.backdropPath }
+
         val shuffled = moviesWithImages.shuffled()
         val questions = mutableListOf<QuizQuestion>()
         val usedMovieIds = mutableSetOf<String>()
@@ -36,7 +38,7 @@ class QuizGenerator(
             val candidate = shuffled.firstOrNull { it.movie.imdbId !in usedMovieIds } ?: break
 
             val question = when (type) {
-                0 -> generateGuessMovie(candidate, shuffled, usedImages)
+                0 -> generateGuessMovie(candidate, shuffled, usedImages, backdropMap)
                 1 -> generateGuessYear(candidate, shuffled)
                 2 -> generateGuessActor(candidate, shuffled)
                 else -> null
@@ -45,7 +47,8 @@ class QuizGenerator(
             questions.add(question)
             usedMovieIds.add(candidate.movie.imdbId)
             if (type == 0) {
-                candidate.movie.posterPath?.let { usedImages.add(it) }
+                val usedPath = backdropMap[candidate.movie.imdbId] ?: candidate.movie.posterPath
+                usedPath?.let { usedImages.add(it) }
             }
         }
 
@@ -79,10 +82,11 @@ class QuizGenerator(
         movie: MovieWithGenres,
         allMovies: List<MovieWithGenres>,
         usedImages: Set<String>,
+        backdropMap: Map<String, String>,
     ): QuizQuestion.GuessTheMovie? {
-        val posterPath = movie.movie.posterPath ?: return null
-        if (posterPath in usedImages) return null
-        val imageUrl = "$IMAGE_BASE$posterPath"
+        val imagePath = backdropMap[movie.movie.imdbId] ?: movie.movie.posterPath ?: return null
+        if (imagePath in usedImages) return null
+        val imageUrl = "$IMAGE_BASE$imagePath"
 
         val distractors = allMovies
             .filter { it.movie.imdbId != movie.movie.imdbId }

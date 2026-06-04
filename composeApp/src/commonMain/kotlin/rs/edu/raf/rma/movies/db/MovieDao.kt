@@ -24,6 +24,8 @@ data class MovieWithGenres(
     val genres: List<GenreEntity>,
 )
 
+data class MovieBackdrop(val imdbId: String, val backdropPath: String)
+
 data class MovieDetailWithGenresAndActors(
     @Embedded val detail: MovieDetailEntity,
     @Relation(
@@ -163,6 +165,11 @@ interface MovieDao {
     @Query("SELECT COUNT(*) FROM watchlist")
     fun observeWatchlistCount(): Flow<Int>
 
+    // --- Genres ---
+
+    @Query("SELECT * FROM genres ORDER BY name ASC")
+    fun observeGenres(): Flow<List<GenreEntity>>
+
     // --- Quiz Sessions ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -173,4 +180,12 @@ interface MovieDao {
 
     @Query("SELECT COUNT(*) FROM quiz_sessions")
     fun observeQuizCount(): Flow<Int>
+
+    @Query("DELETE FROM quiz_sessions")
+    suspend fun clearQuizSessions()
+
+    // --- Backdrop lookup for quiz ---
+
+    @Query("SELECT imdbId, backdropPath FROM movie_details WHERE backdropPath IS NOT NULL")
+    suspend fun getMovieBackdropPaths(): List<MovieBackdrop>
 }

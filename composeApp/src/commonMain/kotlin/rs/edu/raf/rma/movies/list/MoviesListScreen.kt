@@ -20,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -84,8 +86,17 @@ fun MoviesListScreen(
             TopAppBar(
                 title = { Text("Filmovi") },
                 actions = {
+                    val activeFilterCount = with(state.filter) {
+                        listOfNotNull(genreId, minYear, maxYear, minRating,
+                            sortBy?.takeIf { it != "imdb_rating" },
+                            sortOrder?.takeIf { it != "desc" }).size
+                    }
                     IconButton(onClick = { viewModel.onEvent(MoviesListEvent.ToggleFilterSheet) }) {
-                        Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                        BadgedBox(badge = {
+                            if (activeFilterCount > 0) Badge { Text(activeFilterCount.toString()) }
+                        }) {
+                            Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                        }
                     }
                 }
             )
@@ -135,6 +146,7 @@ fun MoviesListScreen(
             ModalBottomSheet(onDismissRequest = { viewModel.onEvent(MoviesListEvent.ToggleFilterSheet) }) {
                 FilterSheet(
                     currentFilter = state.filter,
+                    genres = state.genres,
                     onApply = { viewModel.onEvent(MoviesListEvent.FilterChanged(it)) },
                     onDismiss = { viewModel.onEvent(MoviesListEvent.ToggleFilterSheet) },
                 )

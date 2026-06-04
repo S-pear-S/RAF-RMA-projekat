@@ -27,8 +27,15 @@ class MoviesListViewModel(
 
     init {
         observeMoviesFromDb()
+        observeGenres()
         loadInitialMovies()
         observeSearchDebounced()
+    }
+
+    private fun observeGenres() {
+        repository.observeGenres()
+            .onEach { genres -> _state.update { it.copy(genres = genres) } }
+            .launchIn(viewModelScope)
     }
 
     private fun observeMoviesFromDb() {

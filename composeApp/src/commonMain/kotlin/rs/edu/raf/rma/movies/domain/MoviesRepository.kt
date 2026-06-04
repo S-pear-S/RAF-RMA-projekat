@@ -18,6 +18,7 @@ interface MoviesRepository {
     suspend fun refreshMovies(page: Int = 1, filter: MovieFilter = MovieFilter()): Boolean
     suspend fun refreshMovieDetails(id: String)
     suspend fun countMoviesWithImages(): Int
+    fun observeGenres(): Flow<List<Genre>>
     fun observeFavorites(): Flow<List<Movie>>
     fun observeWatchlist(): Flow<List<Movie>>
     fun observeIsFavorite(id: String): Flow<Boolean>
