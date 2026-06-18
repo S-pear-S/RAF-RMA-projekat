@@ -27,12 +27,8 @@ class LoginViewModel(
     val effects = _effects.receiveAsFlow()
 
     fun onEvent(event: AuthEvent) {
-        when (event) {
-            is AuthEvent.LoginChanged -> _state.update { it.copy(username = event.username, error = null) }
-            is AuthEvent.PasswordChanged -> _state.update { it.copy(password = event.password, error = null) }
-            AuthEvent.Submit -> login()
-            else -> Unit
-        }
+        _state.update { reduce(it, event) }
+        if (event is AuthEvent.Submit) login()
     }
 
     private fun login() {
@@ -58,4 +54,10 @@ class LoginViewModel(
             }
         }
     }
+}
+
+private fun reduce(state: LoginState, event: AuthEvent): LoginState = when (event) {
+    is AuthEvent.LoginChanged -> state.copy(username = event.username, error = null)
+    is AuthEvent.PasswordChanged -> state.copy(password = event.password, error = null)
+    is AuthEvent.FullNameChanged, AuthEvent.Submit -> state
 }

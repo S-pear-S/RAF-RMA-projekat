@@ -1,11 +1,9 @@
 package rs.edu.raf.rma.movies.list
 
 import rs.edu.raf.rma.movies.domain.Genre
-import rs.edu.raf.rma.movies.domain.Movie
 import rs.edu.raf.rma.movies.domain.MovieFilter
 
 data class MoviesListState(
-    val movies: List<Movie> = emptyList(),
     val genres: List<Genre> = emptyList(),
     val filter: MovieFilter = MovieFilter(),
     val isLoading: Boolean = false,

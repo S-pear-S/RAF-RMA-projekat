@@ -53,6 +53,7 @@ kotlin {
             implementation(libs.compose.material3.adaptive.navigation.suite)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.compose.ui.backhandler)
 
             // Lifecycle & Navigation
             implementation(libs.androidx.lifecycle.viewmodelCompose)
@@ -85,6 +86,11 @@ kotlin {
             // Room
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
+
+            // Paging
+            implementation(libs.room.paging)
+            implementation(libs.paging.common)
+            implementation(libs.paging.compose)
 
             // Image Loading
             implementation(libs.coil.compose)

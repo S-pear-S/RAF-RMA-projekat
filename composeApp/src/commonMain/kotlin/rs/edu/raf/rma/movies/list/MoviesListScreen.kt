@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -59,6 +61,7 @@ fun MoviesListScreen(
     viewModel: MoviesListViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
+    val lazyMovies = viewModel.moviesFlow.collectAsLazyPagingItems()
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
 
@@ -72,7 +75,7 @@ fun MoviesListScreen(
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }
             .collect { layoutInfo ->
-                val total = layoutInfo.totalItemsCount
+                val total = lazyMovies.itemCount
                 val last = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
                 if (total > 0 && last >= total - 3) {
                     viewModel.onEvent(MoviesListEvent.LoadNextPage)
@@ -117,7 +120,7 @@ fun MoviesListScreen(
                 onRefresh = { viewModel.onEvent(MoviesListEvent.Refresh) },
                 modifier = Modifier.fillMaxSize(),
             ) {
-                if (state.isLoading && state.movies.isEmpty()) {
+                if (state.isLoading && lazyMovies.itemCount == 0) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
@@ -127,8 +130,14 @@ fun MoviesListScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        items(state.movies, key = { it.imdbId }) { movie ->
-                            MovieListItem(movie = movie, onClick = { onMovieClick(movie.imdbId) })
+                        items(
+                            count = lazyMovies.itemCount,
+                            key = lazyMovies.itemKey { it.imdbId },
+                        ) { index ->
+                            val movie = lazyMovies[index]
+                            if (movie != null) {
+                                MovieListItem(movie = movie, onClick = { onMovieClick(movie.imdbId) })
+                            }
                         }
                         if (state.isLoadingMore) {
                             item {

@@ -1,4 +1,4 @@
-package rs.edu.raf.rma.posts.splash
+package rs.edu.raf.rma.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

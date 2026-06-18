@@ -12,9 +12,9 @@ import rs.edu.raf.rma.auth.LoginScreen
 import rs.edu.raf.rma.auth.RegisterScreen
 import rs.edu.raf.rma.core.auth.model.AuthState
 import rs.edu.raf.rma.navigation.MainNavigation
-import rs.edu.raf.rma.posts.splash.BootState
-import rs.edu.raf.rma.posts.splash.SplashScreen
-import rs.edu.raf.rma.posts.splash.SplashViewModel
+import rs.edu.raf.rma.splash.BootState
+import rs.edu.raf.rma.splash.SplashScreen
+import rs.edu.raf.rma.splash.SplashViewModel
 
 @Composable
 fun ShowtimeApp() {

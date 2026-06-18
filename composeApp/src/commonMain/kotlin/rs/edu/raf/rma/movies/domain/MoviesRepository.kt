@@ -1,5 +1,6 @@
 package rs.edu.raf.rma.movies.domain
 
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 
 data class MovieFilter(
@@ -13,7 +14,7 @@ data class MovieFilter(
 )
 
 interface MoviesRepository {
-    fun observeMovies(filter: MovieFilter = MovieFilter()): Flow<List<Movie>>
+    fun moviesPager(filter: MovieFilter = MovieFilter()): Flow<PagingData<Movie>>
     fun observeMovieDetails(id: String): Flow<MovieDetails?>
     suspend fun refreshMovies(page: Int = 1, filter: MovieFilter = MovieFilter()): Boolean
     suspend fun refreshMovieDetails(id: String)

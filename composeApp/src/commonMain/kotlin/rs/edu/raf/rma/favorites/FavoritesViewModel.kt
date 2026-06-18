@@ -43,34 +43,35 @@ class FavoritesViewModel(
     }
 
     fun onEvent(event: FavoritesEvent) {
+        val previousMovies = _state.value.movies
+        _state.update { reduce(it, event) }
         when (event) {
-            FavoritesEvent.Refresh -> {
-                _state.update { it.copy(isLoading = true) }
-                viewModelScope.launch {
-                    try {
-                        repository.syncFavorites()
-                    } catch (e: Exception) {
-                        _effects.send(FavoritesEffect.ShowMessage("Greška pri sinhronizaciji: ${e.message}"))
-                    } finally {
-                        _state.update { it.copy(isLoading = false) }
-                    }
+            FavoritesEvent.Refresh -> viewModelScope.launch {
+                try {
+                    repository.syncFavorites()
+                } catch (e: Exception) {
+                    _effects.send(FavoritesEffect.ShowMessage("Greška pri sinhronizaciji: ${e.message}"))
+                } finally {
+                    _state.update { it.copy(isLoading = false) }
                 }
             }
 
-            is FavoritesEvent.Remove -> {
-                val previousMovies = _state.value.movies
-                _state.update { it.copy(movies = it.movies.filter { m -> m.imdbId != event.movieId }) }
-                viewModelScope.launch {
-                    try {
-                        repository.removeFavorite(event.movieId)
-                    } catch (e: Exception) {
-                        _state.update { it.copy(movies = previousMovies) }
-                        _effects.send(FavoritesEffect.ShowMessage("Uklanjanje nije uspelo."))
-                    }
+            is FavoritesEvent.Remove -> viewModelScope.launch {
+                try {
+                    repository.removeFavorite(event.movieId)
+                } catch (e: Exception) {
+                    _state.update { it.copy(movies = previousMovies) }
+                    _effects.send(FavoritesEffect.ShowMessage("Uklanjanje nije uspelo."))
                 }
             }
 
-            FavoritesEvent.DismissError -> _state.update { it.copy(error = null) }
+            FavoritesEvent.DismissError -> Unit
         }
     }
+}
+
+private fun reduce(state: FavoritesState, event: FavoritesEvent): FavoritesState = when (event) {
+    FavoritesEvent.Refresh -> state.copy(isLoading = true)
+    is FavoritesEvent.Remove -> state.copy(movies = state.movies.filter { it.imdbId != event.movieId })
+    FavoritesEvent.DismissError -> state.copy(error = null)
 }

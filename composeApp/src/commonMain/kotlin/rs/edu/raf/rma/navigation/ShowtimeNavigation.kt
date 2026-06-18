@@ -31,6 +31,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.savedstate.read
 import rs.edu.raf.rma.favorites.FavoritesScreen
 import rs.edu.raf.rma.movies.detail.MovieDetailScreen
 import rs.edu.raf.rma.movies.list.MoviesListScreen
@@ -92,7 +93,7 @@ fun MainNavigation(onLogout: () -> Unit) {
             }
 
             composable("movie/{movieId}") { back ->
-                val movieId = back.arguments?.getString("movieId") ?: return@composable
+                val movieId = back.arguments?.read { getStringOrNull("movieId") } ?: return@composable
                 MovieDetailScreen(movieId = movieId, onBack = { navController.popBackStack() })
             }
 
@@ -128,10 +129,11 @@ fun MainNavigation(onLogout: () -> Unit) {
             }
 
             composable("quiz_result/{score}/{correct}/{total}/{timeUsed}") { back ->
-                val score = back.arguments?.getString("score")?.toDoubleOrNull() ?: 0.0
-                val correct = back.arguments?.getString("correct")?.toIntOrNull() ?: 0
-                val total = back.arguments?.getString("total")?.toIntOrNull() ?: 10
-                val timeUsed = back.arguments?.getString("timeUsed")?.toIntOrNull() ?: 0
+                val arguments = back.arguments
+                val score = arguments?.read { getStringOrNull("score") }?.toDoubleOrNull() ?: 0.0
+                val correct = arguments?.read { getStringOrNull("correct") }?.toIntOrNull() ?: 0
+                val total = arguments?.read { getStringOrNull("total") }?.toIntOrNull() ?: 10
+                val timeUsed = arguments?.read { getStringOrNull("timeUsed") }?.toIntOrNull() ?: 0
                 QuizResultScreen(
                     score = score,
                     correctAnswers = correct,

@@ -1,4 +1,4 @@
-package rs.edu.raf.rma.posts.splash
+package rs.edu.raf.rma.splash
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -52,4 +52,3 @@ private fun AppAnimatedLogo() {
         contentDescription = "Finlab Logo",
     )
 }
-

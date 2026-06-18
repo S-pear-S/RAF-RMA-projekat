@@ -1,5 +1,6 @@
 package rs.edu.raf.rma.movies.db
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Insert
@@ -74,7 +75,7 @@ interface MovieDao {
             CASE WHEN :sortBy = 'year' AND :sortOrder = 'desc' THEN year END DESC,
             CASE WHEN :sortBy = 'imdb_rating' OR :sortBy IS NULL THEN imdbRating END DESC
     """)
-    fun observeFilteredMovies(
+    fun moviesPagingSource(
         query: String? = null,
         genreId: Int? = null,
         minYear: Int? = null,
@@ -82,7 +83,7 @@ interface MovieDao {
         minRating: Double? = null,
         sortBy: String? = null,
         sortOrder: String? = null,
-    ): Flow<List<MovieWithGenres>>
+    ): PagingSource<Int, MovieWithGenres>
 
     @Query("SELECT COUNT(*) FROM movies WHERE posterPath IS NOT NULL")
     suspend fun countMoviesWithImages(): Int

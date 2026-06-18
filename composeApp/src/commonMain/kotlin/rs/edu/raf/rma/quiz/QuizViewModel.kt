@@ -57,28 +57,22 @@ class QuizViewModel(
     }
 
     fun onEvent(event: QuizEvent) {
+        if (event is QuizEvent.SelectAnswer) {
+            val state = _state.value
+            if (state.revealedAnswer || state.currentQuestion == null) return
+        }
+
+        _state.update { reduce(it, event) }
+
         when (event) {
             QuizEvent.StartQuiz -> loadQuestions()
 
-            is QuizEvent.SelectAnswer -> {
-                val state = _state.value
-                if (state.revealedAnswer || state.currentQuestion == null) return
-                _state.update {
-                    it.copy(
-                        selectedAnswer = event.answer,
-                        revealedAnswer = true,
-                        answers = it.answers + (it.currentIndex to event.answer),
-                    )
-                }
-                viewModelScope.launch {
-                    delay(1200)
-                    advanceQuestion()
-                }
+            is QuizEvent.SelectAnswer -> viewModelScope.launch {
+                delay(1200)
+                advanceQuestion()
             }
 
             QuizEvent.NextQuestion -> advanceQuestion()
-
-            QuizEvent.RequestAbandon -> _state.update { it.copy(showAbandonDialog = true) }
 
             QuizEvent.ConfirmAbandon -> {
                 timerJob?.cancel()
@@ -87,9 +81,7 @@ class QuizViewModel(
                 }
             }
 
-            QuizEvent.DismissAbandon -> _state.update { it.copy(showAbandonDialog = false) }
-
-            QuizEvent.TimerTick -> Unit
+            QuizEvent.RequestAbandon, QuizEvent.DismissAbandon, QuizEvent.TimerTick -> Unit
         }
     }
 
@@ -140,4 +132,15 @@ class QuizViewModel(
         timerJob?.cancel()
         super.onCleared()
     }
+}
+
+private fun reduce(state: QuizState, event: QuizEvent): QuizState = when (event) {
+    is QuizEvent.SelectAnswer -> state.copy(
+        selectedAnswer = event.answer,
+        revealedAnswer = true,
+        answers = state.answers + (state.currentIndex to event.answer),
+    )
+    QuizEvent.RequestAbandon -> state.copy(showAbandonDialog = true)
+    QuizEvent.DismissAbandon -> state.copy(showAbandonDialog = false)
+    QuizEvent.StartQuiz, QuizEvent.NextQuestion, QuizEvent.ConfirmAbandon, QuizEvent.TimerTick -> state
 }

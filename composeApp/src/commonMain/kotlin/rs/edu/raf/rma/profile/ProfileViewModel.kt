@@ -60,18 +60,19 @@ class ProfileViewModel(
     }
 
     fun onEvent(event: ProfileEvent) {
+        _state.update { reduce(it, event) }
         when (event) {
-            ProfileEvent.Logout -> {
-                viewModelScope.launch {
-                    repository.clearUserData()
-                    authStore.clearAuthData()
-                    _effects.send(ProfileEffect.NavigateToAuth)
-                }
+            ProfileEvent.Logout -> viewModelScope.launch {
+                repository.clearUserData()
+                authStore.clearAuthData()
+                _effects.send(ProfileEffect.NavigateToAuth)
             }
-            ProfileEvent.Refresh -> {
-                _state.update { it.copy(isLoading = true, error = null) }
-                loadProfile()
-            }
+            ProfileEvent.Refresh -> loadProfile()
         }
     }
+}
+
+private fun reduce(state: ProfileState, event: ProfileEvent): ProfileState = when (event) {
+    ProfileEvent.Refresh -> state.copy(isLoading = true, error = null)
+    ProfileEvent.Logout -> state
 }

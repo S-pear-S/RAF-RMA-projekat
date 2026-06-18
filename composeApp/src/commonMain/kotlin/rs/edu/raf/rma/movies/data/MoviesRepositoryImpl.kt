@@ -1,5 +1,9 @@
 package rs.edu.raf.rma.movies.data
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -21,16 +25,21 @@ class MoviesRepositoryImpl(
     private val dao: MovieDao,
 ) : MoviesRepository {
 
-    override fun observeMovies(filter: MovieFilter): Flow<List<Movie>> =
-        dao.observeFilteredMovies(
-            query = filter.query,
-            genreId = filter.genreId,
-            minYear = filter.minYear,
-            maxYear = filter.maxYear,
-            minRating = filter.minRating,
-            sortBy = filter.sortBy,
-            sortOrder = filter.sortOrder,
-        ).map { list -> list.map { it.toDomain() } }
+    override fun moviesPager(filter: MovieFilter): Flow<PagingData<Movie>> =
+        Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+            pagingSourceFactory = {
+                dao.moviesPagingSource(
+                    query = filter.query,
+                    genreId = filter.genreId,
+                    minYear = filter.minYear,
+                    maxYear = filter.maxYear,
+                    minRating = filter.minRating,
+                    sortBy = filter.sortBy,
+                    sortOrder = filter.sortOrder,
+                )
+            },
+        ).flow.map { pagingData -> pagingData.map { it.toDomain() } }
 
     override fun observeMovieDetails(id: String): Flow<MovieDetails?> {
         return combine(

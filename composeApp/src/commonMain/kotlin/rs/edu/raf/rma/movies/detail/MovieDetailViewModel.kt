@@ -45,71 +45,76 @@ class MovieDetailViewModel(
     }
 
     fun onEvent(event: MovieDetailEvent) {
+        _state.update { reduce(it, event) }
         when (event) {
-            MovieDetailEvent.Refresh -> {
-                _state.update { it.copy(isLoading = true, error = null) }
-                refresh()
-            }
-
-            MovieDetailEvent.ToggleFavorite -> {
-                val movie = _state.value.movie ?: return
-                viewModelScope.launch {
-                    _state.update { it.copy(isTogglingFavorite = true) }
-                    val wasAdded = !movie.isFavorite
-                    try {
-                        if (movie.isFavorite) {
-                            repository.removeFavorite(movieId)
-                        } else {
-                            repository.addFavorite(
-                                rs.edu.raf.rma.movies.domain.Movie(
-                                    imdbId = movie.imdbId,
-                                    title = movie.title,
-                                    year = movie.year,
-                                    imdbRating = movie.imdbRating,
-                                    posterPath = movie.posterPath,
-                                    genres = movie.genres,
-                                )
-                            )
-                        }
-                    } catch (e: Exception) {
-                        val msg = if (wasAdded) "Dodavanje u favorite nije uspelo." else "Uklanjanje iz favorita nije uspelo."
-                        _effects.send(MovieDetailEffect.ShowMessage(msg))
-                    } finally {
-                        _state.update { it.copy(isTogglingFavorite = false) }
-                    }
-                }
-            }
-
-            MovieDetailEvent.ToggleWatchlist -> {
-                val movie = _state.value.movie ?: return
-                viewModelScope.launch {
-                    _state.update { it.copy(isTogglingWatchlist = true) }
-                    val wasAdded = !movie.isOnWatchlist
-                    try {
-                        if (movie.isOnWatchlist) {
-                            repository.removeFromWatchlist(movieId)
-                        } else {
-                            repository.addToWatchlist(
-                                rs.edu.raf.rma.movies.domain.Movie(
-                                    imdbId = movie.imdbId,
-                                    title = movie.title,
-                                    year = movie.year,
-                                    imdbRating = movie.imdbRating,
-                                    posterPath = movie.posterPath,
-                                    genres = movie.genres,
-                                )
-                            )
-                        }
-                    } catch (e: Exception) {
-                        val msg = if (wasAdded) "Dodavanje na watchlist nije uspelo." else "Uklanjanje sa watchliste nije uspelo."
-                        _effects.send(MovieDetailEffect.ShowMessage(msg))
-                    } finally {
-                        _state.update { it.copy(isTogglingWatchlist = false) }
-                    }
-                }
-            }
-
-            MovieDetailEvent.DismissError -> _state.update { it.copy(error = null) }
+            MovieDetailEvent.Refresh -> refresh()
+            MovieDetailEvent.ToggleFavorite -> toggleFavorite()
+            MovieDetailEvent.ToggleWatchlist -> toggleWatchlist()
+            MovieDetailEvent.DismissError -> Unit
         }
     }
+
+    private fun toggleFavorite() {
+        val movie = _state.value.movie ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(isTogglingFavorite = true) }
+            val wasAdded = !movie.isFavorite
+            try {
+                if (movie.isFavorite) {
+                    repository.removeFavorite(movieId)
+                } else {
+                    repository.addFavorite(
+                        rs.edu.raf.rma.movies.domain.Movie(
+                            imdbId = movie.imdbId,
+                            title = movie.title,
+                            year = movie.year,
+                            imdbRating = movie.imdbRating,
+                            posterPath = movie.posterPath,
+                            genres = movie.genres,
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                val msg = if (wasAdded) "Dodavanje u favorite nije uspelo." else "Uklanjanje iz favorita nije uspelo."
+                _effects.send(MovieDetailEffect.ShowMessage(msg))
+            } finally {
+                _state.update { it.copy(isTogglingFavorite = false) }
+            }
+        }
+    }
+
+    private fun toggleWatchlist() {
+        val movie = _state.value.movie ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(isTogglingWatchlist = true) }
+            val wasAdded = !movie.isOnWatchlist
+            try {
+                if (movie.isOnWatchlist) {
+                    repository.removeFromWatchlist(movieId)
+                } else {
+                    repository.addToWatchlist(
+                        rs.edu.raf.rma.movies.domain.Movie(
+                            imdbId = movie.imdbId,
+                            title = movie.title,
+                            year = movie.year,
+                            imdbRating = movie.imdbRating,
+                            posterPath = movie.posterPath,
+                            genres = movie.genres,
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                val msg = if (wasAdded) "Dodavanje na watchlist nije uspelo." else "Uklanjanje sa watchliste nije uspelo."
+                _effects.send(MovieDetailEffect.ShowMessage(msg))
+            } finally {
+                _state.update { it.copy(isTogglingWatchlist = false) }
+            }
+        }
+    }
+}
+
+private fun reduce(state: MovieDetailState, event: MovieDetailEvent): MovieDetailState = when (event) {
+    MovieDetailEvent.Refresh -> state.copy(isLoading = true, error = null)
+    MovieDetailEvent.DismissError -> state.copy(error = null)
+    MovieDetailEvent.ToggleFavorite, MovieDetailEvent.ToggleWatchlist -> state
 }

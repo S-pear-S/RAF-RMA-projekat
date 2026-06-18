@@ -43,32 +43,32 @@ class WatchlistViewModel(
     }
 
     fun onEvent(event: WatchlistEvent) {
+        val previousMovies = _state.value.movies
+        _state.update { reduce(it, event) }
         when (event) {
-            WatchlistEvent.Refresh -> {
-                _state.update { it.copy(isLoading = true) }
-                viewModelScope.launch {
-                    try {
-                        repository.syncWatchlist()
-                    } catch (e: Exception) {
-                        _effects.send(WatchlistEffect.ShowMessage("Greška pri sinhronizaciji: ${e.message}"))
-                    } finally {
-                        _state.update { it.copy(isLoading = false) }
-                    }
+            WatchlistEvent.Refresh -> viewModelScope.launch {
+                try {
+                    repository.syncWatchlist()
+                } catch (e: Exception) {
+                    _effects.send(WatchlistEffect.ShowMessage("Greška pri sinhronizaciji: ${e.message}"))
+                } finally {
+                    _state.update { it.copy(isLoading = false) }
                 }
             }
 
-            is WatchlistEvent.Remove -> {
-                val previousMovies = _state.value.movies
-                _state.update { it.copy(movies = it.movies.filter { m -> m.imdbId != event.movieId }) }
-                viewModelScope.launch {
-                    try {
-                        repository.removeFromWatchlist(event.movieId)
-                    } catch (e: Exception) {
-                        _state.update { it.copy(movies = previousMovies) }
-                        _effects.send(WatchlistEffect.ShowMessage("Uklanjanje nije uspelo."))
-                    }
+            is WatchlistEvent.Remove -> viewModelScope.launch {
+                try {
+                    repository.removeFromWatchlist(event.movieId)
+                } catch (e: Exception) {
+                    _state.update { it.copy(movies = previousMovies) }
+                    _effects.send(WatchlistEffect.ShowMessage("Uklanjanje nije uspelo."))
                 }
             }
         }
     }
+}
+
+private fun reduce(state: WatchlistState, event: WatchlistEvent): WatchlistState = when (event) {
+    WatchlistEvent.Refresh -> state.copy(isLoading = true)
+    is WatchlistEvent.Remove -> state.copy(movies = state.movies.filter { it.imdbId != event.movieId })
 }

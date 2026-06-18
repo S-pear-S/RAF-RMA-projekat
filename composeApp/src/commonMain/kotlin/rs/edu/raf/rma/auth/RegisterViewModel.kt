@@ -26,12 +26,8 @@ class RegisterViewModel(
     val effects = _effects.receiveAsFlow()
 
     fun onEvent(event: AuthEvent) {
-        when (event) {
-            is AuthEvent.FullNameChanged -> _state.update { it.copy(fullName = event.fullName, error = null) }
-            is AuthEvent.LoginChanged -> _state.update { it.copy(username = event.username, error = null) }
-            is AuthEvent.PasswordChanged -> _state.update { it.copy(password = event.password, error = null) }
-            AuthEvent.Submit -> register()
-        }
+        _state.update { reduce(it, event) }
+        if (event is AuthEvent.Submit) register()
     }
 
     private fun register() {
@@ -73,4 +69,11 @@ class RegisterViewModel(
         if (state.password.length < 8) return "Lozinka mora imati najmanje 8 karaktera."
         return null
     }
+}
+
+private fun reduce(state: RegisterState, event: AuthEvent): RegisterState = when (event) {
+    is AuthEvent.FullNameChanged -> state.copy(fullName = event.fullName, error = null)
+    is AuthEvent.LoginChanged -> state.copy(username = event.username, error = null)
+    is AuthEvent.PasswordChanged -> state.copy(password = event.password, error = null)
+    AuthEvent.Submit -> state
 }
